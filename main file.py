@@ -1,7 +1,8 @@
 import pygame
 
 # ----- CONSTANTS
-BLACK = (0,0,0)
+BLACK = (0, 0, 0)
+GREEN = (94, 243, 140)
 WIDTH = 800
 HEIGHT = 600
 TITLE = "test subject"
@@ -15,10 +16,10 @@ class Player(pygame.sprite.Sprite):
         width = 40
         height = 60
         self.image = pygame.Surface([width, height])
-        #___Hitbox___
+        # ___Hitbox___
         self.rect = self.image.get_rect()
 
-        #___Speed of the player___
+        # ___Speed of the player___
         self.vel_x = 0
         self.vel_y = 0
 
@@ -29,9 +30,8 @@ class Player(pygame.sprite.Sprite):
         """Player's movement"""
         self.calc_grav()
 
-
-        #___Hit Reg___
-        #_Horizontal_
+        # ___Hit Reg___
+        # _Horizontal_
         self.rect.x += self.vel_x
 
         block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
@@ -58,6 +58,7 @@ class Player(pygame.sprite.Sprite):
 
             # Stop our vertical movement
             self.vel_y = 0
+
     def calc_grav(self):
         """The Earth is flat things just fall"""
         if self.vel_y == 0:
@@ -97,16 +98,82 @@ class Player(pygame.sprite.Sprite):
         """ Called when the user lets off the keyboard. """
         self.vel_x = 0
 
+
 # TODO: platforms
+class Platform(pygame.sprite.Sprite):
+    """ Platform the user can jump on """
+
+    def __init__(self, width, height):
+        super().__init__()
+
+        self.image = pygame.Surface([width, height])
+        self.image.fill(GREEN)
+
+        self.rect = self.image.get_rect()
+
+
+class Level(object):
+    """ This is a generic super-class used to define a level.
+        Create a child class for each level with level-specific
+        info. """
+
+    def __init__(self, player):
+        """ Constructor. Pass in a handle to player. Needed for when moving platforms
+            collide with the player. """
+        self.platform_list = pygame.sprite.Group()
+        self.enemy_list = pygame.sprite.Group()
+        self.player = player
+
+        # Background image
+        self.background = None
+
+    # Update everything on this level
+    def update(self):
+        """ Update everything in this level."""
+        self.platform_list.update()
+        self.enemy_list.update()
+
+    def draw(self, screen):
+        """ Draw everything on this level. """
+
+        # Draw the background
+        screen.fill(BLACK)
+
+        # Draw all the sprite lists that we have
+        self.platform_list.draw(screen)
+        self.enemy_list.draw(screen)
+
+
+class Field_01(Level):
+    """ Definition for level 1. """
+
+    def __init__(self, player):
+        """ Create level 1. """
+
+        # Call the parent constructor
+        Level.__init__(self, player)
+
+        # Array with width, height, x, and y of platform
+        level = [[210, 70, 500, 500],
+                 ]
+
+        # Go through the array above and add platforms
+        for platform in level:
+            block = Platform(platform[0], platform[1])
+            block.rect.x = platform[2]
+            block.rect.y = platform[3]
+            block.player = self.player
+            self.platform_list.add(block)
+
+
 # TODO: walls
 # TODO: player sprites
 # TODO: bullet sprites
+# TODO: menu
+# TODO: animation
+# TODO: Background
 # TODO: sounds
 # TODO: stages
-# TODO: animation
-
-
-
 
 
 def main():
