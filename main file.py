@@ -2,9 +2,10 @@ import pygame
 
 # ----- CONSTANTS
 BLACK = (0, 0, 0)
+RED = (255, 0, 0)
 GREEN = (94, 243, 140)
-WIDTH = 800
-HEIGHT = 600
+WIDTH = 816
+HEIGHT = 616
 TITLE = "test subject"
 
 
@@ -18,12 +19,14 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.Surface([width, height])
         # ___Hitbox___
         self.rect = self.image.get_rect()
+        self.image.fill(RED)
 
         # ___Speed of the player___
         self.vel_x = 0
         self.vel_y = 0
 
         # Added this cause plagiarism :D
+        # Supposed to be list of things the sprites bump into
         self.level = None
 
     def update(self):
@@ -153,9 +156,31 @@ class Field_01(Level):
         # Call the parent constructor
         Level.__init__(self, player)
 
-        # Array with width, height, x, and y of platform
-        level = [[210, 70, 500, 500],
-                 ]
+        # Array with width, height, x, and y of platform 616 - 816 player 40 - 60
+        level = [
+            # ____border____
+            # __sides__
+            [8, 616, 0, 0],
+            [8, 616, 808, 0],
+            # __ top and bottom__
+            [816, 8, 0, 0],
+            [816, 8, 0, HEIGHT - 8],
+            # __map platforms__
+            [100, 8, 8, 88],
+            [100, 8, 708, 88],
+            [200, 8, WIDTH/2 - 100, 158],
+            [100, 8, 108, 228],
+            [100, 8, WIDTH - 208, 228],
+            [150, 8, 8, 328],
+            [150, 8, WIDTH - 158, 328],
+            # 8
+            # 9
+            [100, 8, 8, HEIGHT - 120],
+            [100, 8, WIDTH - 108, HEIGHT - 120],
+            [50, 50, WIDTH/2 - 25, HEIGHT - 88],
+            [200, 200, WIDTH/2 - 100, HEIGHT - 348]
+
+        ]
 
         # Go through the array above and add platforms
         for platform in level:
@@ -166,6 +191,7 @@ class Field_01(Level):
             self.platform_list.add(block)
 
 
+# done players
 # TODO: walls
 # TODO: player sprites
 # TODO: bullet sprites
@@ -188,17 +214,75 @@ def main():
     done = False
     clock = pygame.time.Clock()
 
+    # ----- SPRITE GROUPS
+    player_1 = Player()
+    player_2 = Player()
+
+    # -----  FIELD LIST (add more here)
+    Field_list = []
+    Field_list.append(Field_01(player_1))
+    Field_list.append(Field_01(player_2))
+
+    # ----- for field selection
+    Field_selected_num = 0
+    Field_selected = Field_list[Field_selected_num]
+    player_1.level = Field_selected
+    player_2.level = Field_selected
+
+    all_sprites = pygame.sprite.Group()
+    all_sprites.add(player_1)
+    all_sprites.add(player_2)
+
+    # ----- Player's starting spawn point
+    player_1.rect.x = 9
+    player_1.rect.y = HEIGHT - player_1.rect.height - 10
+    player_2.rect.x = 9
+    player_2.rect.y = HEIGHT - player_2.rect.height - 10
+
     # ----- MAIN LOOP
     while not done:
         # -- Event Handler
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
+            # _____Player 1 movement_____
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    player_1.go_left()
+                if event.key == pygame.K_RIGHT:
+                    player_1.go_right()
+                if event.key == pygame.K_UP:
+                    player_1.jump()
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT and player_1.vel_x < 0:
+                    player_1.stop()
+                if event.key == pygame.K_RIGHT and player_1.vel_x > 0:
+                    player_1.stop()
+
+            # _____Player 2 movement_____
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_a:
+                    player_2.go_left()
+                if event.key == pygame.K_d:
+                    player_2.go_right()
+                if event.key == pygame.K_w:
+                    player_2.jump()
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_a and player_2.vel_x < 0:
+                    player_2.stop()
+                if event.key == pygame.K_d and player_2.vel_x > 0:
+                    player_2.stop()
 
         # ----- LOGIC
+        all_sprites.update()
+        Field_selected.update()
 
         # ----- DRAW
         screen.fill(BLACK)
+        Field_selected.draw(screen)
+        all_sprites.draw(screen)
 
         # ----- UPDATE
         pygame.display.flip()
