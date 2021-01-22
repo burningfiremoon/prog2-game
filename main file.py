@@ -171,15 +171,14 @@ class Field_01(Level):
             [200, 8, WIDTH/2 - 100, 158],
             [100, 8, 108, 228],
             [100, 8, WIDTH - 208, 228],
-            [150, 8, 8, 328],
-            [150, 8, WIDTH - 158, 328],
-            # 8
-            # 9
+            [100, 8, 8, 328],
+            [100, 8, WIDTH - 108, 328],
+            [100, 8, WIDTH/2 - 200, 412],
+            [100, 8, WIDTH/2 + 100, 412],
             [100, 8, 8, HEIGHT - 120],
             [100, 8, WIDTH - 108, HEIGHT - 120],
             [50, 50, WIDTH/2 - 25, HEIGHT - 88],
-            [200, 200, WIDTH/2 - 100, HEIGHT - 348]
-
+            [200, 180, WIDTH/2 - 100, HEIGHT - 348]
         ]
 
         # Go through the array above and add platforms
@@ -192,7 +191,7 @@ class Field_01(Level):
 
 
 # done players
-# TODO: walls
+# done walls
 # TODO: player sprites
 # TODO: bullet sprites
 # TODO: menu
