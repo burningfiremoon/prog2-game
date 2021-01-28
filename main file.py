@@ -23,7 +23,6 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load("./Sprites/right_player1-1.png")
         self.rect = self.image.get_rect()
 
-
         # ___Speed of the player___
         self.vel_x = 0
         self.vel_y = 0
@@ -70,7 +69,6 @@ class Player(pygame.sprite.Sprite):
         elif self.vel_x > 0:
             self.image = pygame.image.load("./Sprites/right_player1-1.png")
 
-
     def calc_grav(self):
         """The Earth is flat things just fall"""
         if self.vel_y == 0:
@@ -110,19 +108,16 @@ class Player(pygame.sprite.Sprite):
         """ Called when the user lets off the keyboard. """
         self.vel_x = 0
 
+
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, xy):
+    def __init__(self, x, y):
         super().__init__()
-        width = 10
-        height = 15
-        self.image = pygame.Surface([width, height])
-        # ___Hitbox___
-        self.image.fill(YELLOW)
+        self.image = pygame.image.load("./Sprites/Bullet.png")
 
         self.rect = self.image.get_rect()
-        self.rect.centerx, self.rect.y = xy
+        self.rect.center = x, y
 
-        self.x_vel = 3
+        self.x_vel = 7
 
     def update(self):
         self.rect.x += self.x_vel
@@ -194,17 +189,17 @@ class Field_01(Level):
             # __map platforms__
             [100, 8, 8, 88],
             [100, 8, 708, 88],
-            [200, 8, WIDTH/2 - 100, 158],
+            [200, 8, WIDTH / 2 - 100, 158],
             [100, 8, 108, 228],
             [100, 8, WIDTH - 208, 228],
             [100, 8, 8, 328],
             [100, 8, WIDTH - 108, 328],
-            [100, 8, WIDTH/2 - 200, 412],
-            [100, 8, WIDTH/2 + 100, 412],
+            [100, 8, WIDTH / 2 - 200, 412],
+            [100, 8, WIDTH / 2 + 100, 412],
             [100, 8, 8, HEIGHT - 120],
             [100, 8, WIDTH - 108, HEIGHT - 120],
-            [50, 50, WIDTH/2 - 25, HEIGHT - 88],
-            [200, 180, WIDTH/2 - 100, HEIGHT - 348]
+            [50, 50, WIDTH / 2 - 25, HEIGHT - 88],
+            [200, 180, WIDTH / 2 - 100, HEIGHT - 348]
         ]
 
         # Go through the array above and add platforms
@@ -241,11 +236,15 @@ def main():
 
     # ----- SPRITE GROUPS
     all_sprites = pygame.sprite.Group()
-    bullet_sprites =  pygame.sprite.Group()
-
+    # bullet_sprites_pl1 = pygame.sprite.Group()
+    # bullet_sprites_pl2 = pygame.sprite.Group()
+    bullet_sprites = pygame.sprite.Group()
+    player_sprites = pygame.sprite.Group()
 
     player_1 = Player()
     player_2 = Player()
+    player_sprites.add(player_1)
+    player_sprites.add(player_2)
 
     # -----  FIELD LIST (add more here)
     Field_list = []
@@ -254,10 +253,9 @@ def main():
 
     # ----- for field selection
     Field_selected_num = 0
-    Field_selected = Field_list[Field_selected_num]
-    player_1.level = Field_selected
-    player_2.level = Field_selected
-
+    field_selected = Field_list[Field_selected_num]
+    player_1.level = field_selected
+    player_2.level = field_selected
 
     all_sprites.add(player_1)
     all_sprites.add(player_2)
@@ -268,7 +266,7 @@ def main():
     player_2.rect.x = 767
     player_2.rect.y = HEIGHT - player_2.rect.height - 10
 
-    # ----- MAIN LOOP
+    # ----- MAIN LOOP _____________________________________________________
     while not done:
         # -- Event Handler
         for event in pygame.event.get():
@@ -283,7 +281,7 @@ def main():
                 if event.key == pygame.K_UP:
                     player_1.jump()
                 if event.key == pygame.K_SLASH:
-                    bullet = Bullet(player_1.rect.midtop)
+                    bullet = Bullet(player_1.rect.center[0]+15, player_1.rect.center[1]-10)
                     all_sprites.add(bullet)
                     bullet_sprites.add(bullet)
 
@@ -302,10 +300,9 @@ def main():
                 if event.key == pygame.K_w:
                     player_2.jump()
                 if event.key == pygame.K_q:
-                    bullet = Bullet(player_2.rect.midtop)
+                    bullet = Bullet(player_2.rect.center[0]+15, player_2.rect.center[1]-10)
                     all_sprites.add(bullet)
                     bullet_sprites.add(bullet)
-
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_a and player_2.vel_x < 0:
@@ -315,11 +312,24 @@ def main():
 
         # ----- LOGIC
         all_sprites.update()
-        Field_selected.update()
+        field_selected.update()
+
+        # Check if bullet hits any platform then kill
+        for bullet in bullet_sprites:
+            bullet_hit_group = pygame.sprite.spritecollide(bullet, field_selected.platform_list, False)
+            if len(bullet_hit_group) > 0:
+                bullet.kill()
+
+        # Check if player 1 is hit by player 2 bullet
+        # for bullet in bullet_sprites:
+        #     bullet_hit_group = pygame.sprite.spritecollide(bullet, player_sprites, True)
+        #     if len(bullet_hit_group) > 0:
+        #         bullet.kill()
+
 
         # ----- DRAW
         screen.fill(BLACK)
-        Field_selected.draw(screen)
+        field_selected.draw(screen)
         all_sprites.draw(screen)
 
         # ----- UPDATE
