@@ -4,6 +4,7 @@ import pygame
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (94, 243, 140)
+YELLOW = (255, 255, 0)
 WIDTH = 816
 HEIGHT = 616
 TITLE = "test subject"
@@ -13,13 +14,15 @@ TITLE = "test subject"
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        # self.image = pygame.image.load()
-        width = 40
-        height = 60
-        self.image = pygame.Surface([width, height])
+        # width = 40
+        # height = 60
+        # self.image = pygame.Surface([width, height])
         # ___Hitbox___
+        # self.image.fill(RED)
+
+        self.image = pygame.image.load("./Sprites/right_player1-1.png")
         self.rect = self.image.get_rect()
-        self.image.fill(RED)
+
 
         # ___Speed of the player___
         self.vel_x = 0
@@ -62,6 +65,12 @@ class Player(pygame.sprite.Sprite):
             # Stop our vertical movement
             self.vel_y = 0
 
+        if self.vel_x < 0:
+            self.image = pygame.image.load("./Sprites/left_player1-1.png")
+        elif self.vel_x > 0:
+            self.image = pygame.image.load("./Sprites/right_player1-1.png")
+
+
     def calc_grav(self):
         """The Earth is flat things just fall"""
         if self.vel_y == 0:
@@ -100,6 +109,23 @@ class Player(pygame.sprite.Sprite):
     def stop(self):
         """ Called when the user lets off the keyboard. """
         self.vel_x = 0
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, xy):
+        super().__init__()
+        width = 10
+        height = 15
+        self.image = pygame.Surface([width, height])
+        # ___Hitbox___
+        self.image.fill(YELLOW)
+
+        self.rect = self.image.get_rect()
+        self.rect.centerx, self.rect.y = xy
+
+        self.x_vel = 3
+
+    def update(self):
+        self.rect.x += self.x_vel
 
 
 # TODO: platforms
@@ -214,6 +240,10 @@ def main():
     clock = pygame.time.Clock()
 
     # ----- SPRITE GROUPS
+    all_sprites = pygame.sprite.Group()
+    bullet_sprites =  pygame.sprite.Group()
+
+
     player_1 = Player()
     player_2 = Player()
 
@@ -228,14 +258,14 @@ def main():
     player_1.level = Field_selected
     player_2.level = Field_selected
 
-    all_sprites = pygame.sprite.Group()
+
     all_sprites.add(player_1)
     all_sprites.add(player_2)
 
     # ----- Player's starting spawn point
     player_1.rect.x = 9
     player_1.rect.y = HEIGHT - player_1.rect.height - 10
-    player_2.rect.x = 9
+    player_2.rect.x = 767
     player_2.rect.y = HEIGHT - player_2.rect.height - 10
 
     # ----- MAIN LOOP
@@ -252,6 +282,10 @@ def main():
                     player_1.go_right()
                 if event.key == pygame.K_UP:
                     player_1.jump()
+                if event.key == pygame.K_SLASH:
+                    bullet = Bullet(player_1.rect.midtop)
+                    all_sprites.add(bullet)
+                    bullet_sprites.add(bullet)
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT and player_1.vel_x < 0:
@@ -267,6 +301,11 @@ def main():
                     player_2.go_right()
                 if event.key == pygame.K_w:
                     player_2.jump()
+                if event.key == pygame.K_q:
+                    bullet = Bullet(player_2.rect.midtop)
+                    all_sprites.add(bullet)
+                    bullet_sprites.add(bullet)
+
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_a and player_2.vel_x < 0:
