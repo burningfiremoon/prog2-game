@@ -128,6 +128,11 @@ class Player(pygame.sprite.Sprite):
         self.vel_x = 0
 
 
+class TutorialPlayer(Player):
+    def __init__(self):
+        super().__init__()
+
+
 class Right_Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -190,11 +195,11 @@ class Level(object):
         self.platform_list.update()
         self.enemy_list.update()
 
-    def draw(self, screen):
+    def draw(self, screen,):
         """ Draw everything on this level. """
 
         # Draw the background
-        screen.fill(BLACK)
+        screen.fill(WHITE)
 
         # Draw all the sprite lists that we have
         self.platform_list.draw(screen)
@@ -202,10 +207,10 @@ class Level(object):
 
 
 class Field_01(Level):
-    """ Definition for level 1. """
+    """ Definition for field 1. """
 
     def __init__(self, player):
-        """ Create level 1. """
+        """ Create field 1. """
 
         # Call the parent constructor
         Level.__init__(self, player)
@@ -307,6 +312,8 @@ def tutorial():
     pygame.display.set_caption("Tutorial")
 
     # ----- LOCAL VARIABLES
+    all_sprites = pygame.sprite.Group()
+
     done = False
     clock = pygame.time.Clock()
 
@@ -316,14 +323,12 @@ def tutorial():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_b:
-                    done = True
 
         # ----- LOGIC
 
         # ----- DRAW
         screen.fill(MIDDLE_BLUE_PURPLE)
+        all_sprites.draw(screen)
         draw_text("Tutorial", FONT, BLACK, screen, WIDTH / 2 - 200, 20)
         draw_text("WAD for player 2 movement", FONT, BLACK, screen, WIDTH / 2 - 200, 60)
         draw_text("q to shoot for player 2", FONT, BLACK, screen, WIDTH / 2 - 200, 100)
