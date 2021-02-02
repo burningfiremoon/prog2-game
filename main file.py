@@ -27,6 +27,9 @@ class Player(pygame.sprite.Sprite):
         self.vel_x = 0
         self.vel_y = 0
 
+        # direction variables
+        self.facing_right = True
+
         # Added this cause plagiarism :D
         # Supposed to be list of things the sprites bump into
         self.level = None
@@ -66,8 +69,10 @@ class Player(pygame.sprite.Sprite):
 
         if self.vel_x < 0:
             self.image = pygame.image.load("./Sprites/left_player1-1.png")
+            self.facing_right = False
         elif self.vel_x > 0:
             self.image = pygame.image.load("./Sprites/right_player1-1.png")
+            self.facing_right = True
 
     def calc_grav(self):
         """The Earth is flat things just fall"""
@@ -109,15 +114,29 @@ class Player(pygame.sprite.Sprite):
         self.vel_x = 0
 
 
-class Bullet(pygame.sprite.Sprite):
+class Right_Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.image.load("./Sprites/Bullet.png")
+        self.image = pygame.image.load("Sprites/Right_Bullet.png")
 
         self.rect = self.image.get_rect()
         self.rect.center = x, y
 
         self.x_vel = 7
+
+    def update(self):
+        self.rect.x += self.x_vel
+
+
+class Left_Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.image.load("Sprites/Left_Bullet.png")
+
+        self.rect = self.image.get_rect()
+        self.rect.center = x, y
+
+        self.x_vel = -7
 
     def update(self):
         self.rect.x += self.x_vel
@@ -236,24 +255,25 @@ def main():
 
     # ----- SPRITE GROUPS
     all_sprites = pygame.sprite.Group()
-    # bullet_sprites_pl1 = pygame.sprite.Group()
-    # bullet_sprites_pl2 = pygame.sprite.Group()
-    bullet_sprites = pygame.sprite.Group()
-    player_sprites = pygame.sprite.Group()
+    bullet_sprites_pl1 = pygame.sprite.Group()
+    bullet_sprites_pl2 = pygame.sprite.Group()
+    # bullet_sprites = pygame.sprite.Group()
+    player_1_sprites = pygame.sprite.Group()
+    player_2_sprites = pygame.sprite.Group()
 
     player_1 = Player()
     player_2 = Player()
-    player_sprites.add(player_1)
-    player_sprites.add(player_2)
+    player_1_sprites.add(player_1)
+    player_2_sprites.add(player_2)
 
     # -----  FIELD LIST (add more here)
-    Field_list = []
-    Field_list.append(Field_01(player_1))
-    Field_list.append(Field_01(player_2))
+    field_list = []
+    field_list.append(Field_01(player_1))
+    field_list.append(Field_01(player_2))
 
     # ----- for field selection
-    Field_selected_num = 0
-    field_selected = Field_list[Field_selected_num]
+    field_selected_num = 0
+    field_selected = field_list[field_selected_num]
     player_1.level = field_selected
     player_2.level = field_selected
 
@@ -261,9 +281,9 @@ def main():
     all_sprites.add(player_2)
 
     # ----- Player's starting spawn point
-    player_1.rect.x = 9
+    player_1.rect.x = 767
     player_1.rect.y = HEIGHT - player_1.rect.height - 10
-    player_2.rect.x = 767
+    player_2.rect.x = 9
     player_2.rect.y = HEIGHT - player_2.rect.height - 10
 
     # ----- MAIN LOOP _____________________________________________________
@@ -281,9 +301,14 @@ def main():
                 if event.key == pygame.K_UP:
                     player_1.jump()
                 if event.key == pygame.K_SLASH:
-                    bullet = Bullet(player_1.rect.center[0]+15, player_1.rect.center[1]-10)
-                    all_sprites.add(bullet)
-                    bullet_sprites.add(bullet)
+                    if player_1.facing_right:
+                        bullet = Right_Bullet(player_1.rect.center[0] + 15, player_1.rect.center[1] - 10)
+                        all_sprites.add(bullet)
+                        bullet_sprites_pl1.add(bullet)
+                    elif not player_1.facing_right:
+                        bullet = Left_Bullet(player_1.rect.center[0] - 15, player_1.rect.center[1] - 10)
+                        all_sprites.add(bullet)
+                        bullet_sprites_pl1.add(bullet)
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT and player_1.vel_x < 0:
@@ -300,9 +325,15 @@ def main():
                 if event.key == pygame.K_w:
                     player_2.jump()
                 if event.key == pygame.K_q:
-                    bullet = Bullet(player_2.rect.center[0]+15, player_2.rect.center[1]-10)
-                    all_sprites.add(bullet)
-                    bullet_sprites.add(bullet)
+                    if player_2.facing_right:
+                        bullet = Right_Bullet(player_2.rect.center[0] + 15, player_2.rect.center[1] - 10)
+                        all_sprites.add(bullet)
+                        bullet_sprites_pl2.add(bullet)
+
+                    elif not player_2.facing_right:
+                        bullet = Left_Bullet(player_2.rect.center[0] - 15, player_2.rect.center[1] - 10)
+                        all_sprites.add(bullet)
+                        bullet_sprites_pl2.add(bullet)
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_a and player_2.vel_x < 0:
@@ -315,17 +346,26 @@ def main():
         field_selected.update()
 
         # Check if bullet hits any platform then kill
-        for bullet in bullet_sprites:
+        for bullet in bullet_sprites_pl1:
             bullet_hit_group = pygame.sprite.spritecollide(bullet, field_selected.platform_list, False)
             if len(bullet_hit_group) > 0:
                 bullet.kill()
 
+        for bullet in bullet_sprites_pl2:
+            bullet_hit_group = pygame.sprite.spritecollide(bullet, field_selected.platform_list, False)
+            if len(bullet_hit_group) > 0:
+                bullet.kill()
         # Check if player 1 is hit by player 2 bullet
-        # for bullet in bullet_sprites:
-        #     bullet_hit_group = pygame.sprite.spritecollide(bullet, player_sprites, True)
-        #     if len(bullet_hit_group) > 0:
-        #         bullet.kill()
 
+        for bullet in bullet_sprites_pl1:
+            bullet_kill1_group = pygame.sprite.spritecollide(bullet, player_2_sprites, True)
+            if len(bullet_kill1_group) > 0:
+                bullet.kill()
+
+        for bullet in bullet_sprites_pl2:
+            bullet_kill2_group = pygame.sprite.spritecollide(bullet, player_1_sprites, True)
+            if len(bullet_kill2_group) > 0:
+                bullet.kill()
 
         # ----- DRAW
         screen.fill(BLACK)
