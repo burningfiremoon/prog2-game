@@ -67,13 +67,6 @@ class Player(pygame.sprite.Sprite):
             # Stop our vertical movement
             self.vel_y = 0
 
-        if self.vel_x < 0:
-            self.image = pygame.image.load("./Sprites/left_player1-1.png")
-            self.facing_right = False
-        elif self.vel_x > 0:
-            self.image = pygame.image.load("./Sprites/right_player1-1.png")
-            self.facing_right = True
-
     def calc_grav(self):
         """The Earth is flat things just fall"""
         if self.vel_y == 0:
@@ -104,10 +97,12 @@ class Player(pygame.sprite.Sprite):
     def go_left(self):
         """ Called when the user hits the left arrow. """
         self.vel_x = -6
+        self.facing_right = False
 
     def go_right(self):
         """ Called when the user hits the right arrow. """
         self.vel_x = 6
+        self.facing_right = True
 
     def stop(self):
         """ Called when the user lets off the keyboard. """
@@ -229,17 +224,9 @@ class Field_01(Level):
             block.player = self.player
             self.platform_list.add(block)
 
-
-# done players
-# done walls
-# TODO: player sprites
-# TODO: bullet sprites
-# TODO: menu
-# TODO: animation
-# TODO: Background
-# TODO: sounds
-# TODO: stages
-
+def start_menu():
+    while True:
+        pass
 
 def main():
     pygame.init()
@@ -265,6 +252,10 @@ def main():
     player_2 = Player()
     player_1_sprites.add(player_1)
     player_2_sprites.add(player_2)
+
+    player_1.image = pygame.image.load("Sprites/left_player1-1.png")
+    player_1.facing_right = False
+    player_2.image = pygame.image.load("Sprites/right_player2-1.png")
 
     # -----  FIELD LIST (add more here)
     field_list = []
@@ -296,8 +287,10 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     player_1.go_left()
+                    player_1.image = pygame.image.load("Sprites/left_player1-1.png")
                 if event.key == pygame.K_RIGHT:
                     player_1.go_right()
+                    player_1.image = pygame.image.load("Sprites/right_player1-1.png")
                 if event.key == pygame.K_UP:
                     player_1.jump()
                 if event.key == pygame.K_SLASH:
@@ -320,8 +313,10 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     player_2.go_left()
+                    player_2.image = pygame.image.load("Sprites/left_player2-1.png")
                 if event.key == pygame.K_d:
                     player_2.go_right()
+                    player_2.image = pygame.image.load("Sprites/right_player2-1.png")
                 if event.key == pygame.K_w:
                     player_2.jump()
                 if event.key == pygame.K_q:
