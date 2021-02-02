@@ -3,6 +3,7 @@ import random
 
 # ----- CONSTANTS
 BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (94, 243, 140)
 YELLOW = (255, 255, 0)
@@ -278,7 +279,7 @@ def main_menu(game):
                 if event.key == pygame.K_t:
                     game.tutorial = True
                     done = True
-                if event.key == pygame.K_q:
+                if event.key == pygame.K_ESCAPE:
                     done = True
                     game.not_quit = False
 
@@ -289,7 +290,7 @@ def main_menu(game):
         draw_text("main menu", FONT, BLACK, screen, WIDTH / 2 - 60, 20)
         draw_text("Press \"s\" to start the game", FONT, BLACK, screen, WIDTH / 2 - 60, 40)
         draw_text("press\"t\" to learn the controls", FONT, BLACK, screen, WIDTH / 2 - 100, 60)
-        draw_text("press\"q\" to quit the game", FONT, BLACK, screen, WIDTH / 2 - 200, 80)
+        draw_text("press\"esc\" to quit the game", FONT, BLACK, screen, WIDTH / 2 - 200, 80)
 
         # ----- UPDATE
         pygame.display.flip()
@@ -315,12 +316,20 @@ def tutorial():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_b:
+                    done = True
 
         # ----- LOGIC
 
         # ----- DRAW
         screen.fill(MIDDLE_BLUE_PURPLE)
         draw_text("Tutorial", FONT, BLACK, screen, WIDTH / 2 - 60, 20)
+        draw_text("WAD for player 2 movement", FONT, BLACK, screen, WIDTH / 2 - 60, 40)
+        draw_text("q to shoot for player 2", FONT, BLACK, screen, WIDTH / 2 - 200, 60)
+        draw_text("arrow keys for player 1 movement", FONT, BLACK, screen, WIDTH / 2 - 100, 80)
+        draw_text("/ to shoot for player 1", FONT, BLACK, screen, WIDTH / 2 - 200, 100)
+        draw_text("press \"b\" to go back", FONT, BLACK, screen, WIDTH / 2 - 200, 120)
 
         # ----- UPDATE
         pygame.display.flip()
@@ -329,6 +338,7 @@ def tutorial():
 
 def main():
     pygame.init()
+    FONT = pygame.font.SysFont('arial', 24, False, False)
 
     # ----- SCREEN PROPERTIES
     size = (WIDTH, HEIGHT)
@@ -343,7 +353,6 @@ def main():
     all_sprites = pygame.sprite.Group()
     bullet_sprites_pl1 = pygame.sprite.Group()
     bullet_sprites_pl2 = pygame.sprite.Group()
-    # bullet_sprites = pygame.sprite.Group()
     player_1_sprites = pygame.sprite.Group()
     player_2_sprites = pygame.sprite.Group()
 
@@ -439,12 +448,6 @@ def main():
         all_sprites.update()
         field_selected.update()
 
-        print("player 1 x: " + str(player_1.rect.x))
-        print("player 1 y: " + str(player_1.rect.y))
-        print("player 1 hp: " + str(player_1.hp))
-        print("player 2 x: " + str(player_2.rect.x))
-        print("player 2 y: " + str(player_2.rect.y))
-        print("player 2 hp: " + str(player_2.hp))
         # Check if bullet hits any platform then kill
         for bullet in bullet_sprites_pl1:
             bullet_hit_group = pygame.sprite.spritecollide(bullet, field_selected.platform_list, False)
@@ -467,7 +470,7 @@ def main():
                     player_2.vel_y = 0
                     player_2.rect.x = random.choice([9, 767])
                     player_2.rect.y = random.choice([542, 314, 484, 80])
-                elif player_2.hp < 1:
+                if player_2.hp < 1:
                     done = True
                     print("player1 Wins!")
                 bullet.kill()
@@ -482,21 +485,31 @@ def main():
                     player_1.vel_y = 0
                     player_1.rect.x = random.choice([9, 767])
                     player_1.rect.y = random.choice([542, 314, 484, 80])
-                elif player_1.hp < 1:
+                if player_1.hp < 1:
                     done = True
                     print("player2 Wins!")
+                bullet.kill()
+
+        # Checks if bullet hits bullet
+        for bullet in bullet_sprites_pl1:
+            bullet_bullet1_group = pygame.sprite.spritecollide(bullet, bullet_sprites_pl2, True)
+            if len(bullet_bullet1_group) > 0:
+                bullet.kill()
+        for bullet in bullet_sprites_pl2:
+            bullet_bullet2_group = pygame.sprite.spritecollide(bullet, bullet_sprites_pl1, True)
+            if len(bullet_bullet2_group) > 0:
                 bullet.kill()
 
         # ----- DRAW
         screen.fill(BLACK)
         field_selected.draw(screen)
         all_sprites.draw(screen)
+        draw_text(str(player_2.hp), FONT, WHITE, screen, 9, 20)
+        draw_text(str(player_1.hp), FONT, WHITE, screen, WIDTH - 20, 20)
 
         # ----- UPDATE
         pygame.display.flip()
         clock.tick(60)
-
-    pygame.quit()
 
 
 class menu:
@@ -515,3 +528,5 @@ if __name__ == "__main__":
             main()
         elif game.tutorial:
             tutorial()
+
+    pygame.quit()
