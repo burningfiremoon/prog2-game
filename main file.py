@@ -287,10 +287,10 @@ def main_menu(game):
 
         # ----- DRAW
         screen.fill(MIDDLE_BLUE_PURPLE)
-        draw_text("main menu", FONT, BLACK, screen, WIDTH / 2 - 60, 20)
-        draw_text("Press \"s\" to start the game", FONT, BLACK, screen, WIDTH / 2 - 60, 40)
-        draw_text("press\"t\" to learn the controls", FONT, BLACK, screen, WIDTH / 2 - 100, 60)
-        draw_text("press\"esc\" to quit the game", FONT, BLACK, screen, WIDTH / 2 - 200, 80)
+        draw_text("main menu", FONT, BLACK, screen, WIDTH / 2 - 200, 20)
+        draw_text("Press \"s\" to start the game", FONT, BLACK, screen, WIDTH / 2 - 200, 60)
+        draw_text("press\"t\" to learn the controls", FONT, BLACK, screen, WIDTH / 2 - 200, 100)
+        draw_text("press\"esc\" to quit the game", FONT, BLACK, screen, WIDTH / 2 - 200, 140)
 
         # ----- UPDATE
         pygame.display.flip()
@@ -324,12 +324,12 @@ def tutorial():
 
         # ----- DRAW
         screen.fill(MIDDLE_BLUE_PURPLE)
-        draw_text("Tutorial", FONT, BLACK, screen, WIDTH / 2 - 60, 20)
-        draw_text("WAD for player 2 movement", FONT, BLACK, screen, WIDTH / 2 - 60, 40)
-        draw_text("q to shoot for player 2", FONT, BLACK, screen, WIDTH / 2 - 200, 60)
-        draw_text("arrow keys for player 1 movement", FONT, BLACK, screen, WIDTH / 2 - 100, 80)
-        draw_text("/ to shoot for player 1", FONT, BLACK, screen, WIDTH / 2 - 200, 100)
-        draw_text("press \"b\" to go back", FONT, BLACK, screen, WIDTH / 2 - 200, 120)
+        draw_text("Tutorial", FONT, BLACK, screen, WIDTH / 2 - 200, 20)
+        draw_text("WAD for player 2 movement", FONT, BLACK, screen, WIDTH / 2 - 200, 60)
+        draw_text("q to shoot for player 2", FONT, BLACK, screen, WIDTH / 2 - 200, 100)
+        draw_text("arrow keys for player 1 movement", FONT, BLACK, screen, WIDTH / 2 - 200, 140)
+        draw_text("/ to shoot for player 1", FONT, BLACK, screen, WIDTH / 2 - 200, 180)
+        draw_text("press \"b\" to go back", FONT, BLACK, screen, WIDTH / 2 - 200, 220)
 
         # ----- UPDATE
         pygame.display.flip()
