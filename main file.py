@@ -1,13 +1,20 @@
 import pygame
+import random
 
 # ----- CONSTANTS
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (94, 243, 140)
 YELLOW = (255, 255, 0)
+MIDDLE_BLUE_PURPLE = (125, 122, 188)
 WIDTH = 816
 HEIGHT = 616
 TITLE = "test subject"
+
+# extra variables
+play = False
+tutorial = False
+not_quit = True
 
 
 # ----- Classes ------
@@ -29,6 +36,7 @@ class Player(pygame.sprite.Sprite):
 
         # direction variables
         self.facing_right = True
+        self.hp = 3
 
         # Added this cause plagiarism :D
         # Supposed to be list of things the sprites bump into
@@ -66,6 +74,16 @@ class Player(pygame.sprite.Sprite):
 
             # Stop our vertical movement
             self.vel_y = 0
+
+        if self.rect.right >= WIDTH - 8:
+            self.rect.right = WIDTH - 9
+        elif self.rect.x < 8:
+            self.rect.x = 9
+
+        if self.rect.bottom >= HEIGHT:
+            self.rect.bottom = HEIGHT - 9
+        elif self.rect.y < 8:
+            self.rect.y = 9
 
     def calc_grav(self):
         """The Earth is flat things just fall"""
@@ -137,7 +155,7 @@ class Left_Bullet(pygame.sprite.Sprite):
         self.rect.x += self.x_vel
 
 
-# TODO: platforms
+# done: platforms
 class Platform(pygame.sprite.Sprite):
     """ Platform the user can jump on """
 
@@ -224,9 +242,90 @@ class Field_01(Level):
             block.player = self.player
             self.platform_list.add(block)
 
-def start_menu():
-    while True:
-        pass
+
+def draw_text(text, font, color, surface, x, y):
+    text_obj = font.render(text, 1, color)
+    text_rect = text_obj.get_rect()
+    text_rect.topleft = (x, y)
+    surface.blit(text_obj, text_rect)
+
+
+def main_menu(game):
+    pygame.init()
+    FONT = pygame.font.SysFont('arial', 24, False, False)
+
+    # ----- SCREEN PROPERTIES
+    size = (WIDTH, HEIGHT)
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption(TITLE)
+
+    # ----- LOCAL VARIABLES
+    done = False
+    clock = pygame.time.Clock()
+    game.play = False
+    game.tutorial = False
+
+    # ----- MAIN LOOP
+    while not done:
+        # -- Event Handler
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_s:
+                    game.play = True
+                    done = True
+                if event.key == pygame.K_t:
+                    game.tutorial = True
+                    done = True
+                if event.key == pygame.K_q:
+                    done = True
+                    game.not_quit = False
+
+        # ----- LOGIC
+
+        # ----- DRAW
+        screen.fill(MIDDLE_BLUE_PURPLE)
+        draw_text("main menu", FONT, BLACK, screen, WIDTH / 2 - 60, 20)
+        draw_text("Press \"s\" to start the game", FONT, BLACK, screen, WIDTH / 2 - 60, 40)
+        draw_text("press\"t\" to learn the controls", FONT, BLACK, screen, WIDTH / 2 - 100, 60)
+        draw_text("press\"q\" to quit the game", FONT, BLACK, screen, WIDTH / 2 - 200, 80)
+
+        # ----- UPDATE
+        pygame.display.flip()
+        clock.tick(60)
+
+
+def tutorial():
+    pygame.init()
+    FONT = pygame.font.SysFont('arial', 24, False, False)
+
+    # ----- SCREEN PROPERTIES
+    size = (WIDTH, HEIGHT)
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption("Tutorial")
+
+    # ----- LOCAL VARIABLES
+    done = False
+    clock = pygame.time.Clock()
+
+    # ----- MAIN LOOP
+    while not done:
+        # -- Event Handler
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+
+        # ----- LOGIC
+
+        # ----- DRAW
+        screen.fill(MIDDLE_BLUE_PURPLE)
+        draw_text("Tutorial", FONT, BLACK, screen, WIDTH / 2 - 60, 20)
+
+        # ----- UPDATE
+        pygame.display.flip()
+        clock.tick(60)
+
 
 def main():
     pygame.init()
@@ -340,6 +439,12 @@ def main():
         all_sprites.update()
         field_selected.update()
 
+        print("player 1 x: " + str(player_1.rect.x))
+        print("player 1 y: " + str(player_1.rect.y))
+        print("player 1 hp: " + str(player_1.hp))
+        print("player 2 x: " + str(player_2.rect.x))
+        print("player 2 y: " + str(player_2.rect.y))
+        print("player 2 hp: " + str(player_2.hp))
         # Check if bullet hits any platform then kill
         for bullet in bullet_sprites_pl1:
             bullet_hit_group = pygame.sprite.spritecollide(bullet, field_selected.platform_list, False)
@@ -353,13 +458,33 @@ def main():
         # Check if player 1 is hit by player 2 bullet
 
         for bullet in bullet_sprites_pl1:
-            bullet_kill1_group = pygame.sprite.spritecollide(bullet, player_2_sprites, True)
+            bullet_kill1_group = pygame.sprite.spritecollide(bullet, player_2_sprites, False)
             if len(bullet_kill1_group) > 0:
+                if player_2.hp > 0:
+                    player_2.hp -= 1
+                    player_1.hp += 1
+                    player_2.vel_x = 0
+                    player_2.vel_y = 0
+                    player_2.rect.x = random.choice([9, 767])
+                    player_2.rect.y = random.choice([542, 314, 484, 80])
+                elif player_2.hp < 1:
+                    done = True
+                    print("player1 Wins!")
                 bullet.kill()
 
         for bullet in bullet_sprites_pl2:
-            bullet_kill2_group = pygame.sprite.spritecollide(bullet, player_1_sprites, True)
+            bullet_kill2_group = pygame.sprite.spritecollide(bullet, player_1_sprites, False)
             if len(bullet_kill2_group) > 0:
+                if player_1.hp > 0:
+                    player_1.hp -= 1
+                    player_2.hp += 1
+                    player_1.vel_x = 0
+                    player_1.vel_y = 0
+                    player_1.rect.x = random.choice([9, 767])
+                    player_1.rect.y = random.choice([542, 314, 484, 80])
+                elif player_1.hp < 1:
+                    done = True
+                    print("player2 Wins!")
                 bullet.kill()
 
         # ----- DRAW
@@ -374,5 +499,19 @@ def main():
     pygame.quit()
 
 
+class menu:
+    def __init__(self):
+        self.tutorial = False
+        self.play = False
+        self.not_quit = True
+
+
 if __name__ == "__main__":
-    main()
+    game = menu()
+
+    while game.not_quit:
+        main_menu(game)
+        if game.play:
+            main()
+        elif game.tutorial:
+            tutorial()
