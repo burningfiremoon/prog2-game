@@ -128,11 +128,6 @@ class Player(pygame.sprite.Sprite):
         self.vel_x = 0
 
 
-class TutorialPlayer(Player):
-    def __init__(self):
-        super().__init__()
-
-
 class Right_Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -161,7 +156,6 @@ class Left_Bullet(pygame.sprite.Sprite):
         self.rect.x += self.x_vel
 
 
-# done: platforms
 class Platform(pygame.sprite.Sprite):
     """ Platform the user can jump on """
 
@@ -195,11 +189,11 @@ class Level(object):
         self.platform_list.update()
         self.enemy_list.update()
 
-    def draw(self, screen,):
+    def draw(self, screen, ):
         """ Draw everything on this level. """
 
         # Draw the background
-        screen.fill(WHITE)
+        screen.fill(BLACK)
 
         # Draw all the sprite lists that we have
         self.platform_list.draw(screen)
@@ -238,6 +232,35 @@ class Field_01(Level):
             [100, 8, WIDTH - 108, HEIGHT - 120],
             [50, 50, WIDTH / 2 - 25, HEIGHT - 88],
             [200, 180, WIDTH / 2 - 100, HEIGHT - 348]
+        ]
+
+        # Go through the array above and add platforms
+        for platform in level:
+            block = Platform(platform[0], platform[1])
+            block.rect.x = platform[2]
+            block.rect.y = platform[3]
+            block.player = self.player
+            self.platform_list.add(block)
+
+
+class Tutorial(Level):
+    """ Definition for tutorial. """
+
+    def __init__(self, player):
+        """ Create tutorial. """
+
+        # Call the parent constructor
+        Level.__init__(self, player)
+
+        # Array with width, height, x, and y of platform 616 - 816 player 40 - 60
+        level = [
+            # ____border____
+            # __sides__
+            [8, 616, 0, 0],
+            [8, 616, 808, 0],
+            # __ top and bottom__
+            [816, 8, 0, 0],
+            [816, 8, 0, HEIGHT - 8],
         ]
 
         # Go through the array above and add platforms
@@ -309,32 +332,172 @@ def tutorial():
     # ----- SCREEN PROPERTIES
     size = (WIDTH, HEIGHT)
     screen = pygame.display.set_mode(size)
-    pygame.display.set_caption("Tutorial")
+    pygame.display.set_caption(TITLE)
 
     # ----- LOCAL VARIABLES
-    all_sprites = pygame.sprite.Group()
-
     done = False
     clock = pygame.time.Clock()
 
-    # ----- MAIN LOOP
+    # ----- SPRITE GROUPS
+    all_sprites = pygame.sprite.Group()
+    bullet_sprites_pl1 = pygame.sprite.Group()
+    bullet_sprites_pl2 = pygame.sprite.Group()
+    player_1_sprites = pygame.sprite.Group()
+    player_2_sprites = pygame.sprite.Group()
+
+    player_1 = Player()
+    player_2 = Player()
+    player_1_sprites.add(player_1)
+    player_2_sprites.add(player_2)
+
+    player_1.image = pygame.image.load("Sprites/left_player1-1.png")
+    player_1.facing_right = False
+    player_2.image = pygame.image.load("Sprites/right_player2-1.png")
+
+    # -----  FIELD LIST (add more here)
+    field_list = []
+    field_list.append(Tutorial(player_1))
+    field_list.append(Tutorial(player_2))
+
+    # ----- for field selection
+    field_selected_num = 0
+    field_selected = field_list[field_selected_num]
+    player_1.level = field_selected
+    player_2.level = field_selected
+
+    all_sprites.add(player_1)
+    all_sprites.add(player_2)
+
+    # ----- Player's starting spawn point
+    player_1.rect.x = 767
+    player_1.rect.y = HEIGHT - player_1.rect.height - 10
+    player_2.rect.x = 9
+    player_2.rect.y = HEIGHT - player_2.rect.height - 10
+
+    # ----- TUTORIAL LOOP _____________________________________________________
     while not done:
         # -- Event Handler
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_b:
+                    done = True
+            # _____Player 1 movement_____
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    player_1.go_left()
+                    player_1.image = pygame.image.load("Sprites/left_player1-1.png")
+                if event.key == pygame.K_RIGHT:
+                    player_1.go_right()
+                    player_1.image = pygame.image.load("Sprites/right_player1-1.png")
+                if event.key == pygame.K_UP:
+                    player_1.jump()
+                if event.key == pygame.K_SLASH:
+                    if player_1.facing_right:
+                        bullet = Right_Bullet(player_1.rect.center[0] + 15, player_1.rect.center[1] - 10)
+                        all_sprites.add(bullet)
+                        bullet_sprites_pl1.add(bullet)
+                    elif not player_1.facing_right:
+                        bullet = Left_Bullet(player_1.rect.center[0] - 15, player_1.rect.center[1] - 10)
+                        all_sprites.add(bullet)
+                        bullet_sprites_pl1.add(bullet)
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT and player_1.vel_x < 0:
+                    player_1.stop()
+                if event.key == pygame.K_RIGHT and player_1.vel_x > 0:
+                    player_1.stop()
+
+            # _____Player 2 movement_____
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_a:
+                    player_2.go_left()
+                    player_2.image = pygame.image.load("Sprites/left_player2-1.png")
+                if event.key == pygame.K_d:
+                    player_2.go_right()
+                    player_2.image = pygame.image.load("Sprites/right_player2-1.png")
+                if event.key == pygame.K_w:
+                    player_2.jump()
+                if event.key == pygame.K_q:
+                    if player_2.facing_right:
+                        bullet = Right_Bullet(player_2.rect.center[0] + 15, player_2.rect.center[1] - 10)
+                        all_sprites.add(bullet)
+                        bullet_sprites_pl2.add(bullet)
+
+                    elif not player_2.facing_right:
+                        bullet = Left_Bullet(player_2.rect.center[0] - 15, player_2.rect.center[1] - 10)
+                        all_sprites.add(bullet)
+                        bullet_sprites_pl2.add(bullet)
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_a and player_2.vel_x < 0:
+                    player_2.stop()
+                if event.key == pygame.K_d and player_2.vel_x > 0:
+                    player_2.stop()
 
         # ----- LOGIC
+        all_sprites.update()
+        field_selected.update()
+
+        # Check if bullet hits any platform then kill
+        for bullet in bullet_sprites_pl1:
+            bullet_hit_group = pygame.sprite.spritecollide(bullet, field_selected.platform_list, False)
+            if len(bullet_hit_group) > 0:
+                bullet.kill()
+
+        for bullet in bullet_sprites_pl2:
+            bullet_hit_group = pygame.sprite.spritecollide(bullet, field_selected.platform_list, False)
+            if len(bullet_hit_group) > 0:
+                bullet.kill()
+        # Check if player 1 is hit by player 2 bullet
+
+        for bullet in bullet_sprites_pl1:
+            bullet_kill1_group = pygame.sprite.spritecollide(bullet, player_2_sprites, False)
+            if len(bullet_kill1_group) > 0:
+                if player_2.hp > 0:
+                    player_2.vel_x = 0
+                    player_2.vel_y = 0
+                    player_2.rect.x = random.choice([9, 767])
+                    player_2.rect.y = random.choice([542, 314, 484, 80])
+                if player_2.hp < 1:
+                    done = True
+                    print("player1 Wins!")
+                bullet.kill()
+
+        for bullet in bullet_sprites_pl2:
+            bullet_kill2_group = pygame.sprite.spritecollide(bullet, player_1_sprites, False)
+            if len(bullet_kill2_group) > 0:
+                if player_1.hp > 0:
+                    player_1.vel_x = 0
+                    player_1.vel_y = 0
+                    player_1.rect.x = random.choice([9, 767])
+                    player_1.rect.y = random.choice([542, 314, 484, 80])
+                if player_1.hp < 1:
+                    done = True
+                    print("player2 Wins!")
+                bullet.kill()
+
+        # Checks if bullet hits bullet
+        for bullet in bullet_sprites_pl1:
+            bullet_bullet1_group = pygame.sprite.spritecollide(bullet, bullet_sprites_pl2, True)
+            if len(bullet_bullet1_group) > 0:
+                bullet.kill()
+        for bullet in bullet_sprites_pl2:
+            bullet_bullet2_group = pygame.sprite.spritecollide(bullet, bullet_sprites_pl1, True)
+            if len(bullet_bullet2_group) > 0:
+                bullet.kill()
 
         # ----- DRAW
-        screen.fill(MIDDLE_BLUE_PURPLE)
+        screen.fill(BLACK)
+        field_selected.draw(screen)
         all_sprites.draw(screen)
-        draw_text("Tutorial", FONT, BLACK, screen, WIDTH / 2 - 200, 20)
-        draw_text("WAD for player 2 movement", FONT, BLACK, screen, WIDTH / 2 - 200, 60)
-        draw_text("q to shoot for player 2", FONT, BLACK, screen, WIDTH / 2 - 200, 100)
-        draw_text("arrow keys for player 1 movement", FONT, BLACK, screen, WIDTH / 2 - 200, 140)
-        draw_text("/ to shoot for player 1", FONT, BLACK, screen, WIDTH / 2 - 200, 180)
-        draw_text("press \"b\" to go back", FONT, BLACK, screen, WIDTH / 2 - 200, 220)
+        draw_text("Tutorial", FONT, WHITE, screen, WIDTH / 2 - 200, 20)
+        draw_text("WAD for player 2 movement", FONT, WHITE, screen, WIDTH / 2 - 200, 60)
+        draw_text("q to shoot for player 2", FONT, WHITE, screen, WIDTH / 2 - 200, 100)
+        draw_text("arrow keys for player 1 movement", FONT, WHITE, screen, WIDTH / 2 - 200, 140)
+        draw_text("/ to shoot for player 1", FONT, WHITE, screen, WIDTH / 2 - 200, 180)
+        draw_text("press \"b\" to go back", FONT, WHITE, screen, WIDTH / 2 - 200, 220)
 
         # ----- UPDATE
         pygame.display.flip()
