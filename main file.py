@@ -504,7 +504,7 @@ def tutorial():
         clock.tick(60)
 
 
-def main():
+def main(game):
     pygame.init()
     FONT = pygame.font.SysFont('arial', 24, False, False)
 
@@ -516,6 +516,8 @@ def main():
     # ----- LOCAL VARIABLES
     done = False
     clock = pygame.time.Clock()
+    game.player1_win = False
+    game.player2_win = False
 
     # ----- SPRITE GROUPS
     all_sprites = pygame.sprite.Group()
@@ -639,6 +641,7 @@ def main():
                     player_2.rect.x = random.choice([9, 767])
                     player_2.rect.y = random.choice([542, 314, 484, 80])
                 if player_2.hp < 1:
+                    game.player1_win = True
                     done = True
                     print("player1 Wins!")
                 bullet.kill()
@@ -654,6 +657,7 @@ def main():
                     player_1.rect.x = random.choice([9, 767])
                     player_1.rect.y = random.choice([542, 314, 484, 80])
                 if player_1.hp < 1:
+                    game.player2_win = True
                     done = True
                     print("player2 Wins!")
                 bullet.kill()
@@ -680,11 +684,85 @@ def main():
         clock.tick(60)
 
 
+def player1_win():
+    pygame.init()
+    FONT = pygame.font.SysFont('arial', 24, False, False)
+
+    # ----- SCREEN PROPERTIES
+    size = (WIDTH, HEIGHT)
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption(TITLE)
+
+    # ----- LOCAL VARIABLES
+    done = False
+    clock = pygame.time.Clock()
+
+    # ----- MAIN LOOP
+    while not done:
+        # -- Event Handler
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_b:
+                    done = True
+
+        # ----- LOGIC
+
+        # ----- DRAW
+        screen.fill(MIDDLE_BLUE_PURPLE)
+        draw_text("Player 1 wins :D", FONT, BLACK, screen, WIDTH / 2 - 200, 20)
+        draw_text("press \"b\" to go back to menu", FONT, BLACK, screen, WIDTH / 2 - 200, 60)
+
+        # ----- UPDATE
+        pygame.display.flip()
+        clock.tick(60)
+
+    pygame.quit()
+
+
+def player2_win():
+    pygame.init()
+    FONT = pygame.font.SysFont('arial', 24, False, False)
+
+    # ----- SCREEN PROPERTIES
+    size = (WIDTH, HEIGHT)
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption(TITLE)
+
+    # ----- LOCAL VARIABLES
+    done = False
+    clock = pygame.time.Clock()
+
+    # ----- MAIN LOOP
+    while not done:
+        # -- Event Handler
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_b:
+                    done = True
+
+        # ----- LOGIC
+
+        # ----- DRAW
+        screen.fill(MIDDLE_BLUE_PURPLE)
+        draw_text("Player 2 wins :D", FONT, BLACK, screen, WIDTH / 2 - 200, 20)
+        draw_text("press \"b\" to go back to menu", FONT, BLACK, screen, WIDTH / 2 - 200, 60)
+
+        # ----- UPDATE
+        pygame.display.flip()
+        clock.tick(60)
+
+
 class menu:
     def __init__(self):
         self.tutorial = False
         self.play = False
         self.not_quit = True
+        self.player2_win = False
+        self.player1_win = False
 
 
 if __name__ == "__main__":
@@ -693,7 +771,11 @@ if __name__ == "__main__":
     while game.not_quit:
         main_menu(game)
         if game.play:
-            main()
+            main(game)
+            if game.player1_win:
+                player1_win()
+            if game.player2_win:
+                player2_win()
         elif game.tutorial:
             tutorial()
 
