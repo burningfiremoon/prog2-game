@@ -22,11 +22,6 @@ not_quit = True
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        # width = 40
-        # height = 60
-        # self.image = pygame.Surface([width, height])
-        # ___Hitbox___
-        # self.image.fill(RED)
 
         self.image = pygame.image.load("./Sprites/right_player1-1.png")
         self.rect = self.image.get_rect()
@@ -126,6 +121,19 @@ class Player(pygame.sprite.Sprite):
     def stop(self):
         """ Called when the user lets off the keyboard. """
         self.vel_x = 0
+
+    def duck_right(self):
+        # width = 40
+        # height = 60
+        # self.image = pygame.Surface([width, height])
+        # ___Hitbox___
+        # self.image.fill(RED)
+        self.image = pygame.Surface([40, 30])
+        self.image.fill(RED)
+        current_coords = (self.rect.x, self.rect.y + 30)
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = current_coords
+
 
 
 class Right_Bullet(pygame.sprite.Sprite):
@@ -393,6 +401,8 @@ def tutorial():
                     player_1.image = pygame.image.load("Sprites/right_player1-1.png")
                 if event.key == pygame.K_UP:
                     player_1.jump()
+                if event.key == pygame.K_DOWN:
+                    player_1.duck_right()
                 if event.key == pygame.K_SLASH:
                     if player_1.facing_right:
                         bullet = Right_Bullet(player_1.rect.center[0] + 15, player_1.rect.center[1] - 10)
