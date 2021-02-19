@@ -130,11 +130,14 @@ class Player(pygame.sprite.Sprite):
         # self.image.fill(RED)
         self.image = pygame.Surface([40, 30])
         self.image.fill(RED)
-        current_coords = (self.rect.x, self.rect.y + 30)
+        current_cords = (self.rect.x, self.rect.y + 30)
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = current_coords
+        self.rect.x, self.rect.y = current_cords
 
-
+    def stand_up(self):
+        current_cords = (self.rect.x, self.rect.y - 30)
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = current_cords
 
 class Right_Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -418,6 +421,12 @@ def tutorial():
                     player_1.stop()
                 if event.key == pygame.K_RIGHT and player_1.vel_x > 0:
                     player_1.stop()
+                if event.key == pygame.K_DOWN:
+                    if player_1.facing_right:
+                        player_1.image = pygame.image.load("Sprites/left_player1-1.png")
+                    elif not player_1.facing_right:
+                        player_1.image = pygame.image.load("Sprites/left_player1-1.png")
+                    player_1.stand_up
 
             # _____Player 2 movement_____
             if event.type == pygame.KEYDOWN:
